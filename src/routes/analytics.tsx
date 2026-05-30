@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { DollarSign, ShoppingBag, TrendingUp, Trophy } from "lucide-react";
+import { DollarSign, Loader2, ShoppingBag, TrendingUp, Trophy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
-import { formatCurrency, useAppStore } from "@/lib/store";
+import { formatCurrency } from "@/lib/cart-store";
+import { useOrders } from "@/lib/api";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({ meta: [{ title: "Analytics — Brew House" }] }),
@@ -14,20 +15,19 @@ export const Route = createFileRoute("/analytics")({
 });
 
 function AnalyticsPage() {
-  const orders = useAppStore((s) => s.orders);
+  const { data: orders = [], isLoading } = useOrders();
 
   const stats = useMemo(() => {
     const todayStr = new Date().toDateString();
-    const today = orders.filter((o) => new Date(o.createdAt).toDateString() === todayStr);
+    const today = orders.filter((o) => new Date(o.created_at).toDateString() === todayStr);
     const todayRevenue = today.reduce((s, o) => s + o.total, 0);
 
     const monthStart = new Date();
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
-    const monthOrders = orders.filter((o) => new Date(o.createdAt) >= monthStart);
+    const monthOrders = orders.filter((o) => new Date(o.created_at) >= monthStart);
     const monthRevenue = monthOrders.reduce((s, o) => s + o.total, 0);
 
-    // best seller today
     const counts = new Map<string, number>();
     today.forEach((o) => o.items.forEach((it) => counts.set(it.name, (counts.get(it.name) ?? 0) + it.quantity)));
     let best = "—"; let bestN = 0;
@@ -41,7 +41,7 @@ function AnalyticsPage() {
         d.setHours(0, 0, 0, 0);
         const next = new Date(d); next.setDate(d.getDate() + 1);
         const dayOrders = orders.filter((o) => {
-          const t = new Date(o.createdAt);
+          const t = new Date(o.created_at);
           return t >= d && t < next;
         });
         arr.push({
@@ -67,6 +67,14 @@ function AnalyticsPage() {
     };
   }, [orders]);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-muted-foreground">
+        <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading analytics…
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 lg:p-6">
       <div className="mb-6">
@@ -87,21 +95,15 @@ function AnalyticsPage() {
       </div>
 
       <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Revenue trend</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>Revenue trend</CardTitle></CardHeader>
         <CardContent>
           <Tabs defaultValue="7">
             <TabsList>
               <TabsTrigger value="7">Last 7 days</TabsTrigger>
               <TabsTrigger value="30">Last 30 days</TabsTrigger>
             </TabsList>
-            <TabsContent value="7" className="pt-4">
-              <Chart data={stats.week} />
-            </TabsContent>
-            <TabsContent value="30" className="pt-4">
-              <Chart data={stats.month} />
-            </TabsContent>
+            <TabsContent value="7" className="pt-4"><Chart data={stats.week} /></TabsContent>
+            <TabsContent value="30" className="pt-4"><Chart data={stats.month} /></TabsContent>
           </Tabs>
         </CardContent>
       </Card>
@@ -135,9 +137,7 @@ function StatCard({ label, value, sub, icon: Icon }: { label: string; value: str
       <CardContent className="p-5">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-          <div className="rounded-md bg-primary/10 p-2 text-primary">
-            <Icon className="h-4 w-4" />
-          </div>
+          <div className="rounded-md bg-primary/10 p-2 text-primary"><Icon className="h-4 w-4" /></div>
         </div>
         <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
         {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
