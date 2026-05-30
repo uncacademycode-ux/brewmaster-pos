@@ -1,0 +1,30 @@
+import { formatCurrency } from "@/lib/store";
+import type { Order } from "@/lib/types";
+
+export function Receipt({ order }: { order: Order }) {
+  const dt = new Date(order.createdAt);
+  return (
+    <div className="receipt-print hidden print:block">
+      <div style={{ textAlign: "center", fontWeight: "bold", fontSize: 16 }}>BREW HOUSE</div>
+      <div style={{ textAlign: "center", fontSize: 11 }}>123 Bean Street · (555) 010-1234</div>
+      <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }} />
+      <div style={{ fontSize: 11 }}>
+        Order: {order.id.slice(-8).toUpperCase()}<br />
+        {dt.toLocaleString()}
+      </div>
+      <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }} />
+      {order.items.map((it) => (
+        <div key={it.itemId} style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>{it.quantity}× {it.name}</span>
+          <span>{formatCurrency(it.price * it.quantity)}</span>
+        </div>
+      ))}
+      <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }} />
+      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", fontSize: 14 }}>
+        <span>TOTAL</span><span>{formatCurrency(order.total)}</span>
+      </div>
+      <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }} />
+      <div style={{ textAlign: "center", fontSize: 11 }}>Thank you! ☕</div>
+    </div>
+  );
+}
