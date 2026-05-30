@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, Printer, X, CreditCard } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Printer, X, CreditCard, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { formatCurrency, useAppStore } from "@/lib/store";
-import type { Category, Order } from "@/lib/types";
+import { formatCurrency, useCartStore } from "@/lib/cart-store";
+import { useCategories, useCheckout, useMenu } from "@/lib/api";
+import type { Order } from "@/lib/types";
 import { Receipt } from "@/components/receipt";
 import { toast } from "sonner";
 
@@ -17,24 +18,23 @@ export const Route = createFileRoute("/")({
   component: POSPage,
 });
 
-const categories: ("All" | Category)[] = ["All", "Hot", "Cold", "Pastries"];
-
 function POSPage() {
-  const menu = useAppStore((s) => s.menu);
-  const cart = useAppStore((s) => s.cart);
-  const addToCart = useAppStore((s) => s.addToCart);
-  const incQty = useAppStore((s) => s.incQty);
-  const decQty = useAppStore((s) => s.decQty);
-  const removeFromCart = useAppStore((s) => s.removeFromCart);
-  const clearCart = useAppStore((s) => s.clearCart);
-  const checkout = useAppStore((s) => s.checkout);
+  const { data: menu = [], isLoading: menuLoading } = useMenu();
+  const { data: categories = [] } = useCategories();
+  const cart = useCartStore((s) => s.cart);
+  const addToCart = useCartStore((s) => s.addToCart);
+  const incQty = useCartStore((s) => s.incQty);
+  const decQty = useCartStore((s) => s.decQty);
+  const removeFromCart = useCartStore((s) => s.removeFromCart);
+  const clearCart = useCartStore((s) => s.clearCart);
+  const checkout = useCheckout();
 
-  const [cat, setCat] = useState<"All" | Category>("All");
+  const [cat, setCat] = useState<string>("All");
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const [open, setOpen] = useState(false);
 
   const filtered = useMemo(
-    () => (cat === "All" ? menu : menu.filter((m) => m.category === cat)),
+    () => (cat === "All" ? menu : menu.filter((m) => m.category_name === cat)),
     [menu, cat]
   );
 
@@ -42,64 +42,86 @@ function POSPage() {
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
 
-  const handleCheckout = () => {
-    const order = checkout();
-    if (!order) {
+  const handleCheckout = async () => {
+    if (cart.length === 0) {
       toast.error("Cart is empty");
       return;
     }
-    setLastOrder(order);
-    setOpen(true);
-    toast.success("Order placed");
+    try {
+      const order = await checkout.mutateAsync(cart);
+      clearCart();
+      setLastOrder(order);
+      setOpen(true);
+      toast.success("Order placed");
+    } catch (e: any) {
+      toast.error(e.message ?? "Checkout failed");
+    }
   };
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col lg:flex-row">
-      {/* Menu */}
       <section className="flex flex-1 flex-col min-w-0 p-4 lg:p-6">
-        <div className="mb-4 flex items-center justify-between gap-4">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Point of Sale</h1>
             <p className="text-sm text-muted-foreground">Tap an item to add it to the cart</p>
           </div>
-          <Tabs value={cat} onValueChange={(v) => setCat(v as typeof cat)}>
+          <Tabs value={cat} onValueChange={setCat}>
             <TabsList>
+              <TabsTrigger value="All">All</TabsTrigger>
               {categories.map((c) => (
-                <TabsTrigger key={c} value={c}>{c}</TabsTrigger>
+                <TabsTrigger key={c.id} value={c.name}>{c.name}</TabsTrigger>
               ))}
             </TabsList>
           </Tabs>
         </div>
         <ScrollArea className="flex-1">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 pr-2 pb-4">
-            {filtered.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => addToCart(item)}
-                className="group overflow-hidden rounded-xl border bg-card text-left shadow-sm transition hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]"
-              >
-                <div className="aspect-[4/3] overflow-hidden bg-muted">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold leading-tight">{item.name}</h3>
-                    <Badge variant="secondary" className="shrink-0 text-[10px]">{item.category}</Badge>
+          {menuLoading ? (
+            <div className="flex items-center justify-center py-20 text-muted-foreground">
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading menu…
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-20 text-center text-sm text-muted-foreground">
+              No items in this category. Add some from the Menu page.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 pr-2 pb-4">
+              {filtered.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => addToCart(item)}
+                  className="group overflow-hidden rounded-xl border bg-card text-left shadow-sm transition hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]"
+                >
+                  <div className="aspect-[4/3] overflow-hidden bg-muted">
+                    {item.image_url ? (
+                      <img
+                        src={item.image_url}
+                        alt={item.name}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                        <ShoppingBag className="h-8 w-8 opacity-30" />
+                      </div>
+                    )}
                   </div>
-                  <p className="mt-1 text-sm font-bold text-primary">{formatCurrency(item.price)}</p>
-                </div>
-              </button>
-            ))}
-          </div>
+                  <div className="p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-semibold leading-tight">{item.name}</h3>
+                      {item.category_name && (
+                        <Badge variant="secondary" className="shrink-0 text-[10px]">{item.category_name}</Badge>
+                      )}
+                    </div>
+                    <p className="mt-1 text-sm font-bold text-primary">{formatCurrency(item.price)}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </ScrollArea>
       </section>
 
-      {/* Cart */}
       <aside className="flex w-full flex-col border-t bg-card lg:w-[380px] lg:border-l lg:border-t-0">
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
@@ -171,9 +193,13 @@ function POSPage() {
             size="lg"
             className="h-12 w-full text-base font-semibold"
             onClick={handleCheckout}
-            disabled={cart.length === 0}
+            disabled={cart.length === 0 || checkout.isPending}
           >
-            <CreditCard className="mr-2 h-5 w-5" />
+            {checkout.isPending ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : (
+              <CreditCard className="mr-2 h-5 w-5" />
+            )}
             Charge {formatCurrency(total)}
           </Button>
         </div>
@@ -192,7 +218,7 @@ function POSPage() {
               </div>
               <div className="space-y-1 text-sm">
                 {lastOrder.items.map((it) => (
-                  <div key={it.itemId} className="flex justify-between">
+                  <div key={it.id} className="flex justify-between">
                     <span>{it.quantity}× {it.name}</span>
                     <span className="text-muted-foreground">{formatCurrency(it.price * it.quantity)}</span>
                   </div>
@@ -201,9 +227,7 @@ function POSPage() {
             </div>
           )}
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              <Trash2 className="mr-2 h-4 w-4" />Close
-            </Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>Close</Button>
             <Button onClick={() => window.print()}>
               <Printer className="mr-2 h-4 w-4" />Print Receipt
             </Button>

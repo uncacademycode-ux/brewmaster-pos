@@ -1,11 +1,16 @@
-export type Category = "Hot" | "Cold" | "Pastries";
+export interface Category {
+  id: string;
+  name: string;
+  sort_order: number;
+}
 
 export interface MenuItem {
   id: string;
   name: string;
-  category: Category;
+  category_id: string | null;
+  category_name?: string | null;
   price: number;
-  image: string;
+  image_url: string;
 }
 
 export interface CartItem {
@@ -17,10 +22,19 @@ export interface CartItem {
 
 export type OrderStatus = "Pending" | "Preparing" | "Completed";
 
+export interface OrderItemRow {
+  id: string;
+  order_id: string;
+  menu_item_id: string | null;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 export interface Order {
   id: string;
-  items: CartItem[];
-  total: number;
   status: OrderStatus;
-  createdAt: string; // ISO
+  total: number;
+  created_at: string;
+  items: OrderItemRow[];
 }

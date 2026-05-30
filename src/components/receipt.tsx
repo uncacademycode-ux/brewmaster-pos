@@ -1,8 +1,8 @@
-import { formatCurrency } from "@/lib/store";
+import { formatCurrency } from "@/lib/cart-store";
 import type { Order } from "@/lib/types";
 
 export function Receipt({ order }: { order: Order }) {
-  const dt = new Date(order.createdAt);
+  const dt = new Date(order.created_at);
   return (
     <div className="receipt-print hidden print:block">
       <div style={{ textAlign: "center", fontWeight: "bold", fontSize: 16 }}>BREW HOUSE</div>
@@ -14,7 +14,7 @@ export function Receipt({ order }: { order: Order }) {
       </div>
       <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }} />
       {order.items.map((it) => (
-        <div key={it.itemId} style={{ display: "flex", justifyContent: "space-between" }}>
+        <div key={it.id} style={{ display: "flex", justifyContent: "space-between" }}>
           <span>{it.quantity}× {it.name}</span>
           <span>{formatCurrency(it.price * it.quantity)}</span>
         </div>
