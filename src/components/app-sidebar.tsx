@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useLocation } from "react-router-dom";
 import { Coffee, LayoutDashboard, ShoppingCart, ClipboardList, BookOpenText, Moon, Sun } from "lucide-react";
 import {
   Sidebar,
@@ -23,7 +23,7 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const path = useRouterState({ select: (r) => r.location.pathname });
+  const path = useLocation().pathname;
   const { theme, toggle } = useTheme();
 
   return (
