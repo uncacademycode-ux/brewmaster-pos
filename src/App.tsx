@@ -9,6 +9,7 @@ import OrdersPage from "@/pages/Orders";
 import MenuPage from "@/pages/Menu";
 import AnalyticsPage from "@/pages/Analytics";
 import NotFound from "@/pages/NotFound";
+import { PinGate } from "@/components/pin-gate";
 
 const queryClient = new QueryClient();
 
