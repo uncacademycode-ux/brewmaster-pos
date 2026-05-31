@@ -38,17 +38,19 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<POSPage />} />
-              <Route path="/orders" element={<OrdersPage />} />
-              <Route path="/menu" element={<MenuPage />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+        <PinGate>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<POSPage />} />
+                <Route path="/orders" element={<OrdersPage />} />
+                <Route path="/menu" element={<MenuPage />} />
+                <Route path="/analytics" element={<AnalyticsPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </PinGate>
         <Toaster richColors position="top-right" />
       </ThemeProvider>
     </QueryClientProvider>
