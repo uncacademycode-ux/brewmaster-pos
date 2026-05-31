@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Minus, Plus, ShoppingBag, Printer, X, CreditCard, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -13,12 +12,7 @@ import type { Order } from "@/lib/types";
 import { Receipt } from "@/components/receipt";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/")({
-  head: () => ({ meta: [{ title: "POS — Brew House" }] }),
-  component: POSPage,
-});
-
-function POSPage() {
+export default function POSPage() {
   const { data: menu = [], isLoading: menuLoading } = useMenu();
   const { data: categories = [] } = useCategories();
   const cart = useCartStore((s) => s.cart);

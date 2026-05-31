@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { DollarSign, Loader2, ShoppingBag, TrendingUp, Trophy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,12 +8,7 @@ import {
 import { formatCurrency } from "@/lib/cart-store";
 import { useOrders } from "@/lib/api";
 
-export const Route = createFileRoute("/analytics")({
-  head: () => ({ meta: [{ title: "Analytics — Brew House" }] }),
-  component: AnalyticsPage,
-});
-
-function AnalyticsPage() {
+export default function AnalyticsPage() {
   const { data: orders = [], isLoading } = useOrders();
 
   const stats = useMemo(() => {

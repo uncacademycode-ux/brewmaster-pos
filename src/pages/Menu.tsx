@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,12 +23,7 @@ import {
 import type { Category, MenuItem } from "@/lib/types";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/menu")({
-  head: () => ({ meta: [{ title: "Menu — Brew House" }] }),
-  component: MenuPage,
-});
-
-function MenuPage() {
+export default function MenuPage() {
   const { data: menu = [], isLoading: menuLoading } = useMenu();
   const { data: categories = [], isLoading: catLoading } = useCategories();
 
