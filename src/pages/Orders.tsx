@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { Clock, ChefHat, CheckCircle2, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,18 +7,13 @@ import { formatCurrency } from "@/lib/cart-store";
 import { useOrders, useSetOrderStatus } from "@/lib/api";
 import type { Order, OrderStatus } from "@/lib/types";
 
-export const Route = createFileRoute("/orders")({
-  head: () => ({ meta: [{ title: "Orders — Brew House" }] }),
-  component: OrdersPage,
-});
-
 const statusConfig: Record<OrderStatus, { icon: typeof Clock; color: string; next: OrderStatus | null }> = {
   Pending: { icon: Clock, color: "bg-warning/15 text-foreground border-warning/30", next: "Preparing" },
   Preparing: { icon: ChefHat, color: "bg-accent/20 text-foreground border-accent/40", next: "Completed" },
   Completed: { icon: CheckCircle2, color: "bg-success/15 text-foreground border-success/30", next: null },
 };
 
-function OrdersPage() {
+export default function OrdersPage() {
   const { data: orders = [], isLoading } = useOrders();
   const setStatus = useSetOrderStatus();
 
