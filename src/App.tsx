@@ -46,6 +46,7 @@ export default function App() {
                 <Route path="/" element={<POSPage />} />
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/menu" element={<MenuPage />} />
+                <Route path="/tables" element={<TablesPage />} />
                 <Route path="/analytics" element={<AnalyticsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
