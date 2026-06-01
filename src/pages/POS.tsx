@@ -243,7 +243,12 @@ export default function POSPage() {
           {lastOrder && (
             <div className="space-y-3">
               <div className="rounded-lg bg-muted/50 p-3">
-                <p className="text-xs text-muted-foreground">Order #{lastOrder.id.slice(-8).toUpperCase()}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">Order #{lastOrder.id.slice(-8).toUpperCase()}</p>
+                  {lastOrder.table_label && (
+                    <Badge variant="secondary" className="text-[10px]">🪑 {lastOrder.table_label}</Badge>
+                  )}
+                </div>
                 <p className="text-2xl font-bold">{formatCurrency(lastOrder.total)}</p>
               </div>
               <div className="space-y-1 text-sm">
