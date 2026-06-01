@@ -27,6 +27,8 @@ const baseItems = [
 export function AppSidebar() {
   const path = useLocation().pathname;
   const { theme, toggle } = useTheme();
+  const tablesEnabled = useSettingsStore((s) => s.tablesEnabled);
+  const items = baseItems; // always show Tables entry so user can toggle the feature
 
   return (
     <Sidebar collapsible="icon">
