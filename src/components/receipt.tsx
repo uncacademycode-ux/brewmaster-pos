@@ -10,6 +10,7 @@ export function Receipt({ order }: { order: Order }) {
       <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }} />
       <div style={{ fontSize: 11 }}>
         Order: {order.id.slice(-8).toUpperCase()}<br />
+        {order.table_label && <>Table: {order.table_label}<br /></>}
         {dt.toLocaleString()}
       </div>
       <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }} />

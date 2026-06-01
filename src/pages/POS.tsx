@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
-import { Minus, Plus, ShoppingBag, Printer, X, CreditCard, Loader2 } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Printer, X, CreditCard, Loader2, Armchair } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCurrency, useCartStore } from "@/lib/cart-store";
-import { useCategories, useCheckout, useMenu } from "@/lib/api";
+import { useCategories, useCheckout, useMenu, useTables } from "@/lib/api";
+import { useSettingsStore } from "@/lib/settings-store";
 import type { Order } from "@/lib/types";
 import { Receipt } from "@/components/receipt";
 import { toast } from "sonner";
@@ -15,6 +17,10 @@ import { toast } from "sonner";
 export default function POSPage() {
   const { data: menu = [], isLoading: menuLoading } = useMenu();
   const { data: categories = [] } = useCategories();
+  const { data: tables = [] } = useTables();
+  const tablesEnabled = useSettingsStore((s) => s.tablesEnabled);
+  const selectedTableId = useSettingsStore((s) => s.selectedTableId);
+  const setSelectedTableId = useSettingsStore((s) => s.setSelectedTableId);
   const cart = useCartStore((s) => s.cart);
   const addToCart = useCartStore((s) => s.addToCart);
   const incQty = useCartStore((s) => s.incQty);
@@ -41,8 +47,15 @@ export default function POSPage() {
       toast.error("Cart is empty");
       return;
     }
+    if (tablesEnabled && !selectedTableId) {
+      toast.error("Please select a table");
+      return;
+    }
     try {
-      const order = await checkout.mutateAsync(cart);
+      const order = await checkout.mutateAsync({
+        cart,
+        tableId: tablesEnabled ? selectedTableId : null,
+      });
       clearCart();
       setLastOrder(order);
       setOpen(true);
@@ -172,6 +185,29 @@ export default function POSPage() {
         </ScrollArea>
 
         <div className="space-y-3 border-t p-4">
+          {tablesEnabled && (
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <Armchair className="h-3.5 w-3.5" /> Table
+              </label>
+              <Select
+                value={selectedTableId ?? ""}
+                onValueChange={(v) => setSelectedTableId(v || null)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={tables.length ? "Select a table" : "No tables — add some first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {tables.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.label} <span className="text-muted-foreground">· {t.seats} seats</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-1 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span><span>{formatCurrency(subtotal)}</span>
@@ -207,7 +243,12 @@ export default function POSPage() {
           {lastOrder && (
             <div className="space-y-3">
               <div className="rounded-lg bg-muted/50 p-3">
-                <p className="text-xs text-muted-foreground">Order #{lastOrder.id.slice(-8).toUpperCase()}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">Order #{lastOrder.id.slice(-8).toUpperCase()}</p>
+                  {lastOrder.table_label && (
+                    <Badge variant="secondary" className="text-[10px]">🪑 {lastOrder.table_label}</Badge>
+                  )}
+                </div>
                 <p className="text-2xl font-bold">{formatCurrency(lastOrder.total)}</p>
               </div>
               <div className="space-y-1 text-sm">

@@ -81,12 +81,17 @@ function OrderCard({ order, onChange }: { order: Order; onChange: (s: OrderStatu
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-3 pb-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-sm font-mono">#{order.id.slice(-6).toUpperCase()}</CardTitle>
           <span className="text-xs text-muted-foreground">
             {new Date(order.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </span>
         </div>
+        {order.table_label && (
+          <Badge variant="secondary" className="mt-1 w-fit text-[10px]">
+            🪑 {order.table_label}
+          </Badge>
+        )}
       </CardHeader>
       <CardContent className="space-y-2 p-3 pt-0">
         <ul className="space-y-0.5 text-sm">

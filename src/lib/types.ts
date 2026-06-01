@@ -31,10 +31,19 @@ export interface OrderItemRow {
   quantity: number;
 }
 
+export interface CafeTable {
+  id: string;
+  label: string;
+  seats: number;
+  sort_order: number;
+}
+
 export interface Order {
   id: string;
   status: OrderStatus;
   total: number;
   created_at: string;
+  table_id: string | null;
+  table_label?: string | null;
   items: OrderItemRow[];
 }

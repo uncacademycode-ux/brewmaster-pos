@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import POSPage from "@/pages/POS";
 import OrdersPage from "@/pages/Orders";
 import MenuPage from "@/pages/Menu";
+import TablesPage from "@/pages/Tables";
 import AnalyticsPage from "@/pages/Analytics";
 import NotFound from "@/pages/NotFound";
 import { PinGate } from "@/components/pin-gate";
@@ -45,6 +46,7 @@ export default function App() {
                 <Route path="/" element={<POSPage />} />
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/menu" element={<MenuPage />} />
+                <Route path="/tables" element={<TablesPage />} />
                 <Route path="/analytics" element={<AnalyticsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
