@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
-import { Minus, Plus, ShoppingBag, Printer, X, CreditCard, Loader2 } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Printer, X, CreditCard, Loader2, Armchair } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCurrency, useCartStore } from "@/lib/cart-store";
-import { useCategories, useCheckout, useMenu } from "@/lib/api";
+import { useCategories, useCheckout, useMenu, useTables } from "@/lib/api";
+import { useSettingsStore } from "@/lib/settings-store";
 import type { Order } from "@/lib/types";
 import { Receipt } from "@/components/receipt";
 import { toast } from "sonner";
