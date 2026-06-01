@@ -17,6 +17,10 @@ import { toast } from "sonner";
 export default function POSPage() {
   const { data: menu = [], isLoading: menuLoading } = useMenu();
   const { data: categories = [] } = useCategories();
+  const { data: tables = [] } = useTables();
+  const tablesEnabled = useSettingsStore((s) => s.tablesEnabled);
+  const selectedTableId = useSettingsStore((s) => s.selectedTableId);
+  const setSelectedTableId = useSettingsStore((s) => s.setSelectedTableId);
   const cart = useCartStore((s) => s.cart);
   const addToCart = useCartStore((s) => s.addToCart);
   const incQty = useCartStore((s) => s.incQty);
@@ -43,8 +47,15 @@ export default function POSPage() {
       toast.error("Cart is empty");
       return;
     }
+    if (tablesEnabled && !selectedTableId) {
+      toast.error("Please select a table");
+      return;
+    }
     try {
-      const order = await checkout.mutateAsync(cart);
+      const order = await checkout.mutateAsync({
+        cart,
+        tableId: tablesEnabled ? selectedTableId : null,
+      });
       clearCart();
       setLastOrder(order);
       setOpen(true);
