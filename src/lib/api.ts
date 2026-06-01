@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { CartItem, Category, MenuItem, Order, OrderStatus } from "./types";
+import type { CartItem, CafeTable, Category, MenuItem, Order, OrderStatus } from "./types";
 
 // ---------- Categories ----------
 export const categoriesKey = ["categories"] as const;
@@ -121,6 +121,65 @@ export function useDeleteMenuItem() {
   });
 }
 
+// ---------- Tables ----------
+export const tablesKey = ["tables"] as const;
+
+export function useTables() {
+  return useQuery({
+    queryKey: tablesKey,
+    queryFn: async (): Promise<CafeTable[]> => {
+      const { data, error } = await supabase
+        .from("tables")
+        .select("id, label, seats, sort_order")
+        .order("sort_order", { ascending: true })
+        .order("label", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useAddTable() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { label: string; seats?: number; sort_order?: number }) => {
+      const { error } = await supabase.from("tables").insert({
+        label: input.label,
+        seats: input.seats ?? 2,
+        sort_order: input.sort_order ?? 0,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: tablesKey }),
+  });
+}
+
+export function useUpdateTable() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; label?: string; seats?: number; sort_order?: number }) => {
+      const { id, ...patch } = input;
+      const { error } = await supabase.from("tables").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: tablesKey }),
+  });
+}
+
+export function useDeleteTable() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("tables").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: tablesKey });
+      qc.invalidateQueries({ queryKey: ordersKey });
+    },
+  });
+}
+
 // ---------- Orders ----------
 export const ordersKey = ["orders"] as const;
 
@@ -130,7 +189,7 @@ export function useOrders() {
     queryFn: async (): Promise<Order[]> => {
       const { data, error } = await supabase
         .from("orders")
-        .select("id, status, total, created_at, order_items(id, order_id, menu_item_id, name, price, quantity)")
+        .select("id, status, total, created_at, table_id, tables(label), order_items(id, order_id, menu_item_id, name, price, quantity)")
         .order("created_at", { ascending: false })
         .limit(1000);
       if (error) throw error;
@@ -139,6 +198,8 @@ export function useOrders() {
         status: row.status as OrderStatus,
         total: Number(row.total),
         created_at: row.created_at,
+        table_id: row.table_id ?? null,
+        table_label: row.tables?.label ?? null,
         items: (row.order_items ?? []).map((it: any) => ({
           id: it.id,
           order_id: it.order_id,
@@ -155,14 +216,15 @@ export function useOrders() {
 export function useCheckout() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (cart: CartItem[]): Promise<Order> => {
+    mutationFn: async (input: { cart: CartItem[]; tableId?: string | null }): Promise<Order> => {
+      const { cart, tableId } = input;
       if (cart.length === 0) throw new Error("Cart is empty");
       const total = cart.reduce((s, c) => s + c.price * c.quantity, 0);
 
       const { data: orderRow, error: orderErr } = await supabase
         .from("orders")
-        .insert({ status: "Pending", total })
-        .select("id, status, total, created_at")
+        .insert({ status: "Pending", total, table_id: tableId ?? null })
+        .select("id, status, total, created_at, table_id, tables(label)")
         .single();
       if (orderErr || !orderRow) throw orderErr ?? new Error("Failed to create order");
 
@@ -185,6 +247,8 @@ export function useCheckout() {
         status: orderRow.status as OrderStatus,
         total: Number(orderRow.total),
         created_at: orderRow.created_at,
+        table_id: (orderRow as any).table_id ?? null,
+        table_label: (orderRow as any).tables?.label ?? null,
         items: (itemsRows ?? []).map((it: any) => ({
           id: it.id,
           order_id: it.order_id,
@@ -204,6 +268,20 @@ export function useSetOrderStatus() {
   return useMutation({
     mutationFn: async (input: { id: string; status: OrderStatus }) => {
       const { error } = await supabase.from("orders").update({ status: input.status }).eq("id", input.id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ordersKey }),
+  });
+}
+
+export function useSetOrderTable() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; tableId: string | null }) => {
+      const { error } = await supabase
+        .from("orders")
+        .update({ table_id: input.tableId })
+        .eq("id", input.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ordersKey }),
