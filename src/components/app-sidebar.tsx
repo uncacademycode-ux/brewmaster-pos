@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Coffee, LayoutDashboard, ShoppingCart, ClipboardList, BookOpenText, Moon, Sun } from "lucide-react";
+import { Coffee, LayoutDashboard, ShoppingCart, ClipboardList, BookOpenText, Armchair, Moon, Sun } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "./theme-provider";
+import { useSettingsStore } from "@/lib/settings-store";
 
-const items = [
+const baseItems = [
   { title: "POS", url: "/", icon: ShoppingCart },
   { title: "Orders", url: "/orders", icon: ClipboardList },
+  { title: "Tables", url: "/tables", icon: Armchair, tablesOnly: true },
   { title: "Menu", url: "/menu", icon: BookOpenText },
   { title: "Analytics", url: "/analytics", icon: LayoutDashboard },
 ];
