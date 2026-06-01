@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "./theme-provider";
-import { useSettingsStore } from "@/lib/settings-store";
+
 
 const baseItems = [
   { title: "POS", url: "/", icon: ShoppingCart },
