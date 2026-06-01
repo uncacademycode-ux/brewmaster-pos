@@ -185,6 +185,29 @@ export default function POSPage() {
         </ScrollArea>
 
         <div className="space-y-3 border-t p-4">
+          {tablesEnabled && (
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <Armchair className="h-3.5 w-3.5" /> Table
+              </label>
+              <Select
+                value={selectedTableId ?? ""}
+                onValueChange={(v) => setSelectedTableId(v || null)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={tables.length ? "Select a table" : "No tables — add some first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {tables.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.label} <span className="text-muted-foreground">· {t.seats} seats</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-1 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span><span>{formatCurrency(subtotal)}</span>
