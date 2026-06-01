@@ -120,19 +120,54 @@ export type Database = {
           created_at: string
           id: string
           status: string
+          table_id: string | null
           total: number
         }
         Insert: {
           created_at?: string
           id?: string
           status?: string
+          table_id?: string | null
           total?: number
         }
         Update: {
           created_at?: string
           id?: string
           status?: string
+          table_id?: string | null
           total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tables: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          seats: number
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          seats?: number
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          seats?: number
+          sort_order?: number
         }
         Relationships: []
       }
