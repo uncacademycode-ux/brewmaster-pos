@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAddTable, useDeleteTable, useOrders, useTables, useUpdateTable } from "@/lib/api";
 import { useSettingsStore } from "@/lib/settings-store";
+import { formatCurrency } from "@/lib/cart-store";
 import type { CafeTable } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -41,19 +42,22 @@ export default function TablesPage() {
     setOpen(true);
   };
 
+  const statusFr = (s: string) =>
+    s === "Pending" ? "En attente" : s === "Preparing" ? "En préparation" : "Terminée";
+
   const save = async () => {
-    if (!form.label.trim()) return toast.error("Label is required");
+    if (!form.label.trim()) return toast.error("Le libellé est requis");
     try {
       if (editing) {
         await updateTable.mutateAsync({ id: editing.id, ...form });
-        toast.success("Table updated");
+        toast.success("Table mise à jour");
       } else {
         await addTable.mutateAsync(form);
-        toast.success("Table added");
+        toast.success("Table ajoutée");
       }
       setOpen(false);
     } catch (e: any) {
-      toast.error(e.message ?? "Failed");
+      toast.error(e.message ?? "Échec");
     }
   };
 
@@ -64,30 +68,31 @@ export default function TablesPage() {
     <div className="p-4 lg:p-6 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Table Management</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Gestion des Tables</h1>
           <p className="text-sm text-muted-foreground">
-            Manage tables and assign orders to them
+            Gérez les tables et associez-y les commandes
           </p>
         </div>
         <Button onClick={openCreate} disabled={!tablesEnabled}>
-          <Plus className="mr-2 h-4 w-4" /> Add Table
+          <Plus className="mr-2 h-4 w-4" /> Ajouter une table
         </Button>
       </div>
 
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Power className="h-4 w-4" /> Table Management Mode
+            <Power className="h-4 w-4" /> Mode Gestion des Tables
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap items-center justify-between gap-4">
           <div className="text-sm text-muted-foreground max-w-lg">
-            When enabled, every order is linked to a table. Turn it off to run
-            orders-only mode (takeaway / counter) without table selection.
+            Lorsqu'il est activé, chaque commande est liée à une table.
+            Désactivez-le pour fonctionner en mode commandes uniquement
+            (à emporter / comptoir) sans sélection de table.
           </div>
           <div className="flex items-center gap-3">
             <Label htmlFor="tables-toggle" className="text-sm font-medium">
-              {tablesEnabled ? "Enabled" : "Disabled"}
+              {tablesEnabled ? "Activé" : "Désactivé"}
             </Label>
             <Switch
               id="tables-toggle"
@@ -101,8 +106,8 @@ export default function TablesPage() {
       {!tablesEnabled && (
         <Card className="border-dashed">
           <CardContent className="py-8 text-center text-sm text-muted-foreground">
-            Table management is currently off. New orders will be created
-            without a table.
+            La gestion des tables est désactivée. Les nouvelles commandes
+            seront créées sans table.
           </CardContent>
         </Card>
       )}
@@ -111,12 +116,12 @@ export default function TablesPage() {
         <>
           {isLoading ? (
             <div className="flex items-center justify-center py-20 text-muted-foreground">
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading tables…
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Chargement des tables…
             </div>
           ) : tables.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="py-12 text-center text-sm text-muted-foreground">
-                No tables yet. Add your first table to get started.
+                Aucune table. Ajoutez votre première table pour commencer.
               </CardContent>
             </Card>
           ) : (
@@ -133,11 +138,11 @@ export default function TablesPage() {
                             <Armchair className="h-4 w-4" /> {t.label}
                           </CardTitle>
                           <p className="text-xs text-muted-foreground">
-                            {t.seats} seats
+                            {t.seats} places
                           </p>
                         </div>
                         <Badge variant={active.length ? "default" : "secondary"}>
-                          {active.length ? "Occupied" : "Free"}
+                          {active.length ? "Occupée" : "Libre"}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -145,22 +150,22 @@ export default function TablesPage() {
                       {active.length > 0 ? (
                         <div className="space-y-1 rounded-md bg-muted/50 p-2 text-xs">
                           <div className="flex justify-between font-medium">
-                            <span>{active.length} active order{active.length > 1 ? "s" : ""}</span>
-                            <span>${subtotal.toFixed(2)}</span>
+                            <span>{active.length} commande{active.length > 1 ? "s" : ""} active{active.length > 1 ? "s" : ""}</span>
+                            <span>{formatCurrency(subtotal)}</span>
                           </div>
                           {active.slice(0, 3).map((o) => (
                             <div key={o.id} className="flex justify-between text-muted-foreground">
                               <span>#{o.id.slice(-6).toUpperCase()}</span>
-                              <span>{o.status}</span>
+                              <span>{statusFr(o.status)}</span>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-muted-foreground">No active orders</p>
+                        <p className="text-xs text-muted-foreground">Aucune commande active</p>
                       )}
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(t)}>
-                          <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
+                          <Pencil className="mr-1 h-3.5 w-3.5" /> Modifier
                         </Button>
                         <Button
                           size="sm"
@@ -183,11 +188,11 @@ export default function TablesPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Table" : "Add Table"}</DialogTitle>
+            <DialogTitle>{editing ? "Modifier la table" : "Ajouter une table"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label htmlFor="label">Label</Label>
+              <Label htmlFor="label">Libellé</Label>
               <Input
                 id="label"
                 value={form.label}
@@ -197,7 +202,7 @@ export default function TablesPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="seats">Seats</Label>
+                <Label htmlFor="seats">Places</Label>
                 <Input
                   id="seats"
                   type="number"
@@ -207,7 +212,7 @@ export default function TablesPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="sort">Order</Label>
+                <Label htmlFor="sort">Ordre</Label>
                 <Input
                   id="sort"
                   type="number"
@@ -218,12 +223,12 @@ export default function TablesPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
             <Button onClick={save} disabled={addTable.isPending || updateTable.isPending}>
               {(addTable.isPending || updateTable.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editing ? "Save" : "Add"}
+              {editing ? "Enregistrer" : "Ajouter"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -232,27 +237,27 @@ export default function TablesPage() {
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this table?</AlertDialogTitle>
+            <AlertDialogTitle>Supprimer cette table ?</AlertDialogTitle>
             <AlertDialogDescription>
-              "{confirmDelete?.label}" will be removed. Existing orders will keep
-              their history but lose the table link.
+              « {confirmDelete?.label} » sera supprimée. Les commandes existantes
+              conserveront leur historique mais perdront le lien avec la table.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
                 if (!confirmDelete) return;
                 try {
                   await deleteTable.mutateAsync(confirmDelete.id);
-                  toast.success("Table deleted");
+                  toast.success("Table supprimée");
                 } catch (e: any) {
-                  toast.error(e.message ?? "Failed");
+                  toast.error(e.message ?? "Échec");
                 }
                 setConfirmDelete(null);
               }}
             >
-              Delete
+              Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

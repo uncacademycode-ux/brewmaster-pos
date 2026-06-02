@@ -40,8 +40,8 @@ export default function AnalyticsPage() {
         });
         arr.push({
           label: days <= 7
-            ? d.toLocaleDateString(undefined, { weekday: "short" })
-            : `${d.getMonth() + 1}/${d.getDate()}`,
+            ? d.toLocaleDateString("fr-FR", { weekday: "short" })
+            : `${d.getDate()}/${d.getMonth() + 1}`,
           revenue: Number(dayOrders.reduce((s, o) => s + o.total, 0).toFixed(2)),
           orders: dayOrders.length,
         });
@@ -64,7 +64,7 @@ export default function AnalyticsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20 text-muted-foreground">
-        <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading analytics…
+        <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Chargement des analyses…
       </div>
     );
   }
@@ -72,29 +72,29 @@ export default function AnalyticsPage() {
   return (
     <div className="p-4 lg:p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
-        <p className="text-sm text-muted-foreground">Revenue and order insights</p>
+        <h1 className="text-2xl font-bold tracking-tight">Analytique</h1>
+        <p className="text-sm text-muted-foreground">Revenus et statistiques des commandes</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Today's Revenue" value={formatCurrency(stats.todayRevenue)} icon={DollarSign} />
-        <StatCard label="Today's Orders" value={String(stats.todayCount)} icon={ShoppingBag} />
-        <StatCard label="Month Revenue" value={formatCurrency(stats.monthRevenue)} icon={TrendingUp} />
+        <StatCard label="Revenu du jour" value={formatCurrency(stats.todayRevenue)} icon={DollarSign} />
+        <StatCard label="Commandes du jour" value={String(stats.todayCount)} icon={ShoppingBag} />
+        <StatCard label="Revenu du mois" value={formatCurrency(stats.monthRevenue)} icon={TrendingUp} />
         <StatCard
-          label="Best Seller Today"
+          label="Meilleure vente du jour"
           value={stats.best}
-          sub={stats.bestN > 0 ? `${stats.bestN} sold` : "No sales yet"}
+          sub={stats.bestN > 0 ? `${stats.bestN} vendus` : "Aucune vente"}
           icon={Trophy}
         />
       </div>
 
       <Card className="mt-6">
-        <CardHeader><CardTitle>Revenue trend</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Tendance des revenus</CardTitle></CardHeader>
         <CardContent>
           <Tabs defaultValue="7">
             <TabsList>
-              <TabsTrigger value="7">Last 7 days</TabsTrigger>
-              <TabsTrigger value="30">Last 30 days</TabsTrigger>
+              <TabsTrigger value="7">7 derniers jours</TabsTrigger>
+              <TabsTrigger value="30">30 derniers jours</TabsTrigger>
             </TabsList>
             <TabsContent value="7" className="pt-4"><Chart data={stats.week} /></TabsContent>
             <TabsContent value="30" className="pt-4"><Chart data={stats.month} /></TabsContent>
@@ -104,20 +104,20 @@ export default function AnalyticsPage() {
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle>End of Day Summary</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Bilan de la journée</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <Row label="Total revenue" value={formatCurrency(stats.todayRevenue)} />
-            <Row label="Total orders" value={String(stats.todayCount)} />
-            <Row label="Avg order value" value={formatCurrency(stats.todayCount ? stats.todayRevenue / stats.todayCount : 0)} />
-            <Row label="Best seller" value={stats.best} />
+            <Row label="Revenu total" value={formatCurrency(stats.todayRevenue)} />
+            <Row label="Nombre de commandes" value={String(stats.todayCount)} />
+            <Row label="Panier moyen" value={formatCurrency(stats.todayCount ? stats.todayRevenue / stats.todayCount : 0)} />
+            <Row label="Meilleure vente" value={stats.best} />
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>End of Month Summary</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Bilan du mois</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <Row label="Total revenue" value={formatCurrency(stats.monthRevenue)} />
-            <Row label="Total orders" value={String(stats.monthCount)} />
-            <Row label="Avg order value" value={formatCurrency(stats.monthCount ? stats.monthRevenue / stats.monthCount : 0)} />
+            <Row label="Revenu total" value={formatCurrency(stats.monthRevenue)} />
+            <Row label="Nombre de commandes" value={String(stats.monthCount)} />
+            <Row label="Panier moyen" value={formatCurrency(stats.monthCount ? stats.monthRevenue / stats.monthCount : 0)} />
           </CardContent>
         </Card>
       </div>
@@ -157,7 +157,7 @@ function Chart({ data }: { data: { label: string; revenue: number }[] }) {
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
           <XAxis dataKey="label" stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
           <YAxis stroke="var(--color-muted-foreground)" fontSize={11} tickLine={false} axisLine={false}
-            tickFormatter={(v) => `$${v}`} />
+            tickFormatter={(v) => `${v} MAD`} />
           <Tooltip
             cursor={{ fill: "var(--color-muted)" }}
             contentStyle={{
@@ -167,7 +167,7 @@ function Chart({ data }: { data: { label: string; revenue: number }[] }) {
               color: "var(--color-popover-foreground)",
               fontSize: 12,
             }}
-            formatter={(v: number) => [formatCurrency(v), "Revenue"]}
+            formatter={(v: number) => [formatCurrency(v), "Revenu"]}
           />
           <Bar dataKey="revenue" fill="var(--color-chart-1)" radius={[6, 6, 0, 0]} />
         </BarChart>
