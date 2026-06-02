@@ -39,12 +39,12 @@ export function PinGate({ children }: { children: ReactNode }) {
           </div>
           <h1 className="text-xl font-semibold">Brew House</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Staff access only — enter your code
+            Accès réservé au personnel — entrez votre code
           </p>
         </div>
 
         <label className="mb-2 flex items-center gap-2 text-sm font-medium">
-          <Lock className="h-4 w-4" /> Access code
+          <Lock className="h-4 w-4" /> Code d'accès
         </label>
         <Input
           type="password"
@@ -59,11 +59,11 @@ export function PinGate({ children }: { children: ReactNode }) {
           className="text-center text-lg tracking-widest"
         />
         {error && (
-          <p className="mt-2 text-sm text-destructive">Incorrect code. Try again.</p>
+          <p className="mt-2 text-sm text-destructive">Code incorrect. Réessayez.</p>
         )}
 
         <Button type="submit" className="mt-4 w-full" size="lg">
-          Unlock
+          Déverrouiller
         </Button>
       </form>
     </div>
