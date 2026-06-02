@@ -6,12 +6,12 @@ export function Receipt({ order }: { order: Order }) {
   return (
     <div className="receipt-print hidden print:block">
       <div style={{ textAlign: "center", fontWeight: "bold", fontSize: 16 }}>BREW HOUSE</div>
-      <div style={{ textAlign: "center", fontSize: 11 }}>123 Bean Street · (555) 010-1234</div>
+      <div style={{ textAlign: "center", fontSize: 11 }}>123 Rue du Café · (555) 010-1234</div>
       <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }} />
       <div style={{ fontSize: 11 }}>
-        Order: {order.id.slice(-8).toUpperCase()}<br />
-        {order.table_label && <>Table: {order.table_label}<br /></>}
-        {dt.toLocaleString()}
+        Commande : {order.id.slice(-8).toUpperCase()}<br />
+        {order.table_label && <>Table : {order.table_label}<br /></>}
+        {dt.toLocaleString("fr-FR")}
       </div>
       <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }} />
       {order.items.map((it) => (
@@ -25,7 +25,7 @@ export function Receipt({ order }: { order: Order }) {
         <span>TOTAL</span><span>{formatCurrency(order.total)}</span>
       </div>
       <div style={{ borderTop: "1px dashed #000", margin: "8px 0" }} />
-      <div style={{ textAlign: "center", fontSize: 11 }}>Thank you! ☕</div>
+      <div style={{ textAlign: "center", fontSize: 11 }}>Merci ! ☕</div>
     </div>
   );
 }

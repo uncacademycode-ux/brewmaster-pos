@@ -44,11 +44,11 @@ export default function POSPage() {
 
   const handleCheckout = async () => {
     if (cart.length === 0) {
-      toast.error("Cart is empty");
+      toast.error("Le panier est vide");
       return;
     }
     if (tablesEnabled && !selectedTableId) {
-      toast.error("Please select a table");
+      toast.error("Veuillez sélectionner une table");
       return;
     }
     try {
@@ -59,9 +59,9 @@ export default function POSPage() {
       clearCart();
       setLastOrder(order);
       setOpen(true);
-      toast.success("Order placed");
+      toast.success("Commande enregistrée");
     } catch (e: any) {
-      toast.error(e.message ?? "Checkout failed");
+      toast.error(e.message ?? "Échec du paiement");
     }
   };
 
@@ -70,12 +70,12 @@ export default function POSPage() {
       <section className="flex flex-1 flex-col min-w-0 p-4 lg:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Point of Sale</h1>
-            <p className="text-sm text-muted-foreground">Tap an item to add it to the cart</p>
+            <h1 className="text-2xl font-bold tracking-tight">Point de Vente</h1>
+            <p className="text-sm text-muted-foreground">Touchez un article pour l'ajouter au panier</p>
           </div>
           <Tabs value={cat} onValueChange={setCat}>
             <TabsList>
-              <TabsTrigger value="All">All</TabsTrigger>
+              <TabsTrigger value="All">Tout</TabsTrigger>
               {categories.map((c) => (
                 <TabsTrigger key={c.id} value={c.name}>{c.name}</TabsTrigger>
               ))}
@@ -85,11 +85,11 @@ export default function POSPage() {
         <ScrollArea className="flex-1">
           {menuLoading ? (
             <div className="flex items-center justify-center py-20 text-muted-foreground">
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading menu…
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Chargement du menu…
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-20 text-center text-sm text-muted-foreground">
-              No items in this category. Add some from the Menu page.
+              Aucun article dans cette catégorie. Ajoutez-en depuis la page Menu.
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 pr-2 pb-4">
@@ -133,12 +133,12 @@ export default function POSPage() {
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
             <ShoppingBag className="h-5 w-5" />
-            <h2 className="font-semibold">Current Order</h2>
+            <h2 className="font-semibold">Commande en cours</h2>
             <Badge variant="outline">{cart.length}</Badge>
           </div>
           {cart.length > 0 && (
             <Button variant="ghost" size="sm" onClick={clearCart} className="text-muted-foreground">
-              Clear
+              Vider
             </Button>
           )}
         </div>
@@ -148,7 +148,7 @@ export default function POSPage() {
             {cart.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
                 <ShoppingBag className="mb-2 h-10 w-10 opacity-40" />
-                <p className="text-sm">Cart is empty</p>
+                <p className="text-sm">Panier vide</p>
               </div>
             ) : (
               cart.map((c) => (
@@ -156,12 +156,12 @@ export default function POSPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{c.name}</p>
-                      <p className="text-xs text-muted-foreground">{formatCurrency(c.price)} each</p>
+                      <p className="text-xs text-muted-foreground">{formatCurrency(c.price)} l'unité</p>
                     </div>
                     <button
                       onClick={() => removeFromCart(c.itemId)}
                       className="rounded-md p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                      aria-label="Remove"
+                      aria-label="Retirer"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -195,12 +195,12 @@ export default function POSPage() {
                 onValueChange={(v) => setSelectedTableId(v || null)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={tables.length ? "Select a table" : "No tables — add some first"} />
+                  <SelectValue placeholder={tables.length ? "Sélectionner une table" : "Aucune table — ajoutez-en"} />
                 </SelectTrigger>
                 <SelectContent>
                   {tables.map((t) => (
                     <SelectItem key={t.id} value={t.id}>
-                      {t.label} <span className="text-muted-foreground">· {t.seats} seats</span>
+                      {t.label} <span className="text-muted-foreground">· {t.seats} places</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -210,10 +210,10 @@ export default function POSPage() {
 
           <div className="space-y-1 text-sm">
             <div className="flex justify-between text-muted-foreground">
-              <span>Subtotal</span><span>{formatCurrency(subtotal)}</span>
+              <span>Sous-total</span><span>{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
-              <span>Tax (8%)</span><span>{formatCurrency(tax)}</span>
+              <span>TVA (8%)</span><span>{formatCurrency(tax)}</span>
             </div>
             <div className="flex justify-between text-lg font-bold">
               <span>Total</span><span>{formatCurrency(total)}</span>
@@ -230,7 +230,7 @@ export default function POSPage() {
             ) : (
               <CreditCard className="mr-2 h-5 w-5" />
             )}
-            Charge {formatCurrency(total)}
+            Encaisser {formatCurrency(total)}
           </Button>
         </div>
       </aside>
@@ -238,13 +238,13 @@ export default function POSPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Order Confirmed</DialogTitle>
+            <DialogTitle>Commande confirmée</DialogTitle>
           </DialogHeader>
           {lastOrder && (
             <div className="space-y-3">
               <div className="rounded-lg bg-muted/50 p-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">Order #{lastOrder.id.slice(-8).toUpperCase()}</p>
+                  <p className="text-xs text-muted-foreground">Commande #{lastOrder.id.slice(-8).toUpperCase()}</p>
                   {lastOrder.table_label && (
                     <Badge variant="secondary" className="text-[10px]">🪑 {lastOrder.table_label}</Badge>
                   )}
@@ -262,9 +262,9 @@ export default function POSPage() {
             </div>
           )}
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>Close</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>Fermer</Button>
             <Button onClick={() => window.print()}>
-              <Printer className="mr-2 h-4 w-4" />Print Receipt
+              <Printer className="mr-2 h-4 w-4" />Imprimer le reçu
             </Button>
           </DialogFooter>
         </DialogContent>

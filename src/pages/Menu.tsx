@@ -30,16 +30,16 @@ export default function MenuPage() {
   return (
     <div className="p-4 lg:p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Menu Management</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Gestion du Menu</h1>
         <p className="text-sm text-muted-foreground">
-          {menu.length} items in {categories.length} categories
+          {menu.length} articles dans {categories.length} catégories
         </p>
       </div>
 
       <Tabs defaultValue="items">
         <TabsList>
-          <TabsTrigger value="items">Items</TabsTrigger>
-          <TabsTrigger value="categories">Categories</TabsTrigger>
+          <TabsTrigger value="items">Articles</TabsTrigger>
+          <TabsTrigger value="categories">Catégories</TabsTrigger>
         </TabsList>
         <TabsContent value="items" className="mt-4">
           <ItemsPanel menu={menu} categories={categories} loading={menuLoading} />
@@ -79,57 +79,57 @@ function ItemsPanel({
 
   const save = async () => {
     if (!form.name.trim() || form.price <= 0) {
-      toast.error("Name and a valid price are required");
+      toast.error("Le nom et un prix valide sont requis");
       return;
     }
     try {
       if (editing) {
         await updateItem.mutateAsync({ id: editing.id, patch: form });
-        toast.success("Item updated");
+        toast.success("Article mis à jour");
       } else {
         await addItem.mutateAsync(form);
-        toast.success("Item added");
+        toast.success("Article ajouté");
       }
       setOpen(false);
     } catch (e: any) {
-      toast.error(e.message ?? "Save failed");
+      toast.error(e.message ?? "Échec de l'enregistrement");
     }
   };
 
   const remove = async (id: string) => {
     try {
       await deleteItem.mutateAsync(id);
-      toast.success("Item deleted");
+      toast.success("Article supprimé");
     } catch (e: any) {
-      toast.error(e.message ?? "Delete failed");
+      toast.error(e.message ?? "Échec de la suppression");
     }
   };
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle>Catalog</CardTitle>
+        <CardTitle>Catalogue</CardTitle>
         <Button onClick={openCreate} disabled={categories.length === 0}>
-          <Plus className="mr-2 h-4 w-4" />Add item
+          <Plus className="mr-2 h-4 w-4" />Ajouter un article
         </Button>
       </CardHeader>
       <CardContent className="p-0">
         {loading ? (
           <div className="flex items-center justify-center py-12 text-muted-foreground">
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading…
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Chargement…
           </div>
         ) : menu.length === 0 ? (
           <p className="px-6 py-12 text-center text-sm text-muted-foreground">
-            No items yet. {categories.length === 0 && "Create a category first."}
+            Aucun article. {categories.length === 0 && "Créez d'abord une catégorie."}
           </p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-16"></TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="text-right">Price</TableHead>
+                <TableHead>Nom</TableHead>
+                <TableHead>Catégorie</TableHead>
+                <TableHead className="text-right">Prix</TableHead>
                 <TableHead className="w-32 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -171,21 +171,21 @@ function ItemsPanel({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit item" : "New menu item"}</DialogTitle>
+            <DialogTitle>{editing ? "Modifier l'article" : "Nouvel article"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">Nom</Label>
               <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label>Category</Label>
+                <Label>Catégorie</Label>
                 <Select
                   value={form.category_id ?? undefined}
                   onValueChange={(v) => setForm({ ...form, category_id: v })}
                 >
-                  <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Sélectionner…" /></SelectTrigger>
                   <SelectContent>
                     {categories.map((c) => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -194,23 +194,23 @@ function ItemsPanel({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="price">Price (USD)</Label>
+                <Label htmlFor="price">Prix (MAD)</Label>
                 <Input id="price" type="number" step="0.25" min="0"
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="image">Image URL</Label>
+              <Label htmlFor="image">URL de l'image</Label>
               <Input id="image" value={form.image_url}
                 onChange={(e) => setForm({ ...form, image_url: e.target.value })}
                 placeholder="https://..." />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
             <Button onClick={save} disabled={addItem.isPending || updateItem.isPending}>
-              {editing ? "Save changes" : "Add item"}
+              {editing ? "Enregistrer" : "Ajouter"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -248,20 +248,20 @@ function CategoriesPanel({
 
   const save = async () => {
     if (!name.trim()) {
-      toast.error("Name is required");
+      toast.error("Le nom est requis");
       return;
     }
     try {
       if (editing) {
         await updateCat.mutateAsync({ id: editing.id, name, sort_order: sortOrder });
-        toast.success("Category updated");
+        toast.success("Catégorie mise à jour");
       } else {
         await addCat.mutateAsync({ name, sort_order: sortOrder });
-        toast.success("Category added");
+        toast.success("Catégorie ajoutée");
       }
       setOpen(false);
     } catch (e: any) {
-      toast.error(e.message ?? "Save failed");
+      toast.error(e.message ?? "Échec de l'enregistrement");
     }
   };
 
@@ -269,10 +269,10 @@ function CategoriesPanel({
     if (!confirmDelete) return;
     try {
       await deleteCat.mutateAsync(confirmDelete.id);
-      toast.success("Category deleted");
+      toast.success("Catégorie supprimée");
       setConfirmDelete(null);
     } catch (e: any) {
-      toast.error(e.message ?? "Delete failed");
+      toast.error(e.message ?? "Échec de la suppression");
     }
   };
 
@@ -281,23 +281,23 @@ function CategoriesPanel({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle>Categories</CardTitle>
-        <Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" />Add category</Button>
+        <CardTitle>Catégories</CardTitle>
+        <Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" />Ajouter une catégorie</Button>
       </CardHeader>
       <CardContent className="p-0">
         {loading ? (
           <div className="flex items-center justify-center py-12 text-muted-foreground">
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading…
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Chargement…
           </div>
         ) : categories.length === 0 ? (
-          <p className="px-6 py-12 text-center text-sm text-muted-foreground">No categories yet.</p>
+          <p className="px-6 py-12 text-center text-sm text-muted-foreground">Aucune catégorie.</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-20">Order</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Items</TableHead>
+                <TableHead className="w-20">Ordre</TableHead>
+                <TableHead>Nom</TableHead>
+                <TableHead>Articles</TableHead>
                 <TableHead className="w-32 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -329,24 +329,24 @@ function CategoriesPanel({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit category" : "New category"}</DialogTitle>
+            <DialogTitle>{editing ? "Modifier la catégorie" : "Nouvelle catégorie"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="cname">Name</Label>
-              <Input id="cname" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Smoothies" />
+              <Label htmlFor="cname">Nom</Label>
+              <Input id="cname" value={name} onChange={(e) => setName(e.target.value)} placeholder="ex. Smoothies" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="csort">Sort order</Label>
+              <Label htmlFor="csort">Ordre d'affichage</Label>
               <Input id="csort" type="number" value={sortOrder}
                 onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)} />
-              <p className="text-xs text-muted-foreground">Lower numbers appear first.</p>
+              <p className="text-xs text-muted-foreground">Les plus petits numéros apparaissent en premier.</p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
             <Button onClick={save} disabled={addCat.isPending || updateCat.isPending}>
-              {editing ? "Save changes" : "Add category"}
+              {editing ? "Enregistrer" : "Ajouter"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -355,18 +355,18 @@ function CategoriesPanel({
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete “{confirmDelete?.name}”?</AlertDialogTitle>
+            <AlertDialogTitle>Supprimer « {confirmDelete?.name} » ?</AlertDialogTitle>
             <AlertDialogDescription>
               {confirmDelete && itemCount(confirmDelete.id) > 0
-                ? `${itemCount(confirmDelete.id)} menu item(s) will remain but become uncategorized.`
-                : "This category has no items."}
+                ? `${itemCount(confirmDelete.id)} article(s) seront conservés mais deviendront sans catégorie.`
+                : "Cette catégorie ne contient aucun article."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={remove}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
