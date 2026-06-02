@@ -48,4 +48,4 @@ export const useCartStore = create<CartState>()(
 );
 
 export const formatCurrency = (n: number) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+  new Intl.NumberFormat("fr-MA", { style: "currency", currency: "MAD" }).format(n);
