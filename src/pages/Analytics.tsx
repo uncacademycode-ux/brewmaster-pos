@@ -9,7 +9,8 @@ import { formatCurrency } from "@/lib/cart-store";
 import { useOrders } from "@/lib/api";
 
 export default function AnalyticsPage() {
-  const { data: orders = [], isLoading } = useOrders();
+  const { data: allOrders = [], isLoading } = useOrders();
+  const orders = useMemo(() => allOrders.filter((o) => o.status !== "Cancelled"), [allOrders]);
 
   const stats = useMemo(() => {
     const todayStr = new Date().toDateString();
