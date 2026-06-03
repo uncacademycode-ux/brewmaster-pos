@@ -321,3 +321,20 @@ export function useDeleteOrdersInRange() {
   });
 }
 
+export function useDeleteAllOrders() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data: ids, error: e1 } = await supabase.from("orders").select("id");
+      if (e1) throw e1;
+      const orderIds = (ids ?? []).map((r: any) => r.id);
+      if (orderIds.length === 0) return 0;
+      await supabase.from("order_items").delete().in("order_id", orderIds);
+      const { error } = await supabase.from("orders").delete().in("id", orderIds);
+      if (error) throw error;
+      return orderIds.length;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ordersKey }),
+  });
+}
+

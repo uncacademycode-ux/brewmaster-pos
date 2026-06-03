@@ -8,7 +8,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { formatCurrency } from "@/lib/cart-store";
-import { useDeleteOrder, useDeleteOrdersInRange, useOrders, useSetOrderStatus } from "@/lib/api";
+import { useDeleteAllOrders, useDeleteOrder, useDeleteOrdersInRange, useOrders, useSetOrderStatus } from "@/lib/api";
 import type { Order, OrderStatus } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -75,7 +75,8 @@ export default function OrdersPage() {
   const setStatus = useSetOrderStatus();
   const deleteOrder = useDeleteOrder();
   const deleteRange = useDeleteOrdersInRange();
-  const [resetScope, setResetScope] = useState<null | "day" | "month">(null);
+  const deleteAll = useDeleteAllOrders();
+  const [resetScope, setResetScope] = useState<null | "day" | "month" | "all">(null);
 
   const todaysOrders = useMemo(() => {
     const today = new Date().toDateString();
@@ -94,8 +95,13 @@ export default function OrdersPage() {
 
   const handleReset = async () => {
     if (!resetScope) return;
-    const range = resetScope === "day" ? dayRange() : monthRange();
-    const n = await deleteRange.mutateAsync(range);
+    let n = 0;
+    if (resetScope === "all") {
+      n = await deleteAll.mutateAsync();
+    } else {
+      const range = resetScope === "day" ? dayRange() : monthRange();
+      n = await deleteRange.mutateAsync(range);
+    }
     toast.success(`${n} commande(s) supprimée(s)`);
     setResetScope(null);
   };
@@ -121,6 +127,9 @@ export default function OrdersPage() {
           </Button>
           <Button size="sm" variant="destructive" onClick={() => setResetScope("month")} disabled={monthOrders.length === 0}>
             <Trash2 className="mr-1 h-4 w-4" /> Réinit. mois
+          </Button>
+          <Button size="sm" variant="destructive" onClick={() => setResetScope("all")} disabled={orders.length === 0}>
+            <Trash2 className="mr-1 h-4 w-4" /> Tout réinitialiser
           </Button>
         </div>
       </div>
@@ -168,10 +177,10 @@ export default function OrdersPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Réinitialiser les commandes {resetScope === "day" ? "du jour" : "du mois"} ?
+              Réinitialiser les commandes {resetScope === "day" ? "du jour" : resetScope === "month" ? "du mois" : "(TOUT)"} ?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action supprimera définitivement {resetScope === "day" ? todaysOrders.length : monthOrders.length} commande(s)
+              Cette action supprimera définitivement {resetScope === "day" ? todaysOrders.length : resetScope === "month" ? monthOrders.length : orders.length} commande(s)
               {" "}et leurs articles. Pensez à exporter avant.
             </AlertDialogDescription>
           </AlertDialogHeader>

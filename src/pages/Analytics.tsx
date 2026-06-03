@@ -1,16 +1,46 @@
-import { useMemo } from "react";
-import { DollarSign, Loader2, ShoppingBag, TrendingUp, Trophy } from "lucide-react";
+import { useMemo, useState } from "react";
+import { DollarSign, Loader2, ShoppingBag, Trash2, TrendingUp, Trophy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import { formatCurrency } from "@/lib/cart-store";
-import { useOrders } from "@/lib/api";
+import { useDeleteAllOrders, useDeleteOrdersInRange, useOrders } from "@/lib/api";
+import { toast } from "sonner";
+
+function dayRange() {
+  const from = new Date(); from.setHours(0, 0, 0, 0);
+  const to = new Date(from); to.setDate(from.getDate() + 1);
+  return { from, to };
+}
+function monthRange() {
+  const now = new Date();
+  const from = new Date(now.getFullYear(), now.getMonth(), 1);
+  const to = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return { from, to };
+}
 
 export default function AnalyticsPage() {
   const { data: allOrders = [], isLoading } = useOrders();
   const orders = useMemo(() => allOrders.filter((o) => o.status !== "Cancelled"), [allOrders]);
+  const deleteRange = useDeleteOrdersInRange();
+  const deleteAll = useDeleteAllOrders();
+  const [resetScope, setResetScope] = useState<null | "day" | "month" | "all">(null);
+
+  const handleReset = async () => {
+    if (!resetScope) return;
+    let n = 0;
+    if (resetScope === "all") n = await deleteAll.mutateAsync();
+    else n = await deleteRange.mutateAsync(resetScope === "day" ? dayRange() : monthRange());
+    toast.success(`${n} commande(s) supprimée(s)`);
+    setResetScope(null);
+  };
 
   const stats = useMemo(() => {
     const todayStr = new Date().toDateString();
@@ -122,6 +152,45 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="mt-6 border-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-destructive">Zone de réinitialisation</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Supprime définitivement les commandes et leurs articles. Cette action est irréversible — pensez à exporter d'abord depuis la page Commandes.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="destructive" size="sm" onClick={() => setResetScope("day")} disabled={allOrders.length === 0}>
+              <Trash2 className="mr-1 h-4 w-4" /> Réinit. jour
+            </Button>
+            <Button variant="destructive" size="sm" onClick={() => setResetScope("month")} disabled={allOrders.length === 0}>
+              <Trash2 className="mr-1 h-4 w-4" /> Réinit. mois
+            </Button>
+            <Button variant="destructive" size="sm" onClick={() => setResetScope("all")} disabled={allOrders.length === 0}>
+              <Trash2 className="mr-1 h-4 w-4" /> Tout réinitialiser
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={resetScope !== null} onOpenChange={(open) => !open && setResetScope(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Réinitialiser {resetScope === "day" ? "les commandes du jour" : resetScope === "month" ? "les commandes du mois" : "TOUTES les commandes"} ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action supprimera définitivement les commandes et leurs articles. Pensez à exporter avant.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleReset}>Supprimer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
