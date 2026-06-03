@@ -29,6 +29,18 @@ function monthRange() {
 export default function AnalyticsPage() {
   const { data: allOrders = [], isLoading } = useOrders();
   const orders = useMemo(() => allOrders.filter((o) => o.status !== "Cancelled"), [allOrders]);
+  const deleteRange = useDeleteOrdersInRange();
+  const deleteAll = useDeleteAllOrders();
+  const [resetScope, setResetScope] = useState<null | "day" | "month" | "all">(null);
+
+  const handleReset = async () => {
+    if (!resetScope) return;
+    let n = 0;
+    if (resetScope === "all") n = await deleteAll.mutateAsync();
+    else n = await deleteRange.mutateAsync(resetScope === "day" ? dayRange() : monthRange());
+    toast.success(`${n} commande(s) supprimée(s)`);
+    setResetScope(null);
+  };
 
   const stats = useMemo(() => {
     const todayStr = new Date().toDateString();
