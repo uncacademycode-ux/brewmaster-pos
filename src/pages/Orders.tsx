@@ -95,8 +95,13 @@ export default function OrdersPage() {
 
   const handleReset = async () => {
     if (!resetScope) return;
-    const range = resetScope === "day" ? dayRange() : monthRange();
-    const n = await deleteRange.mutateAsync(range);
+    let n = 0;
+    if (resetScope === "all") {
+      n = await deleteAll.mutateAsync();
+    } else {
+      const range = resetScope === "day" ? dayRange() : monthRange();
+      n = await deleteRange.mutateAsync(range);
+    }
     toast.success(`${n} commande(s) supprimée(s)`);
     setResetScope(null);
   };
