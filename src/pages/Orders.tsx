@@ -177,10 +177,10 @@ export default function OrdersPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Réinitialiser les commandes {resetScope === "day" ? "du jour" : "du mois"} ?
+              Réinitialiser les commandes {resetScope === "day" ? "du jour" : resetScope === "month" ? "du mois" : "(TOUT)"} ?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action supprimera définitivement {resetScope === "day" ? todaysOrders.length : monthOrders.length} commande(s)
+              Cette action supprimera définitivement {resetScope === "day" ? todaysOrders.length : resetScope === "month" ? monthOrders.length : orders.length} commande(s)
               {" "}et leurs articles. Pensez à exporter avant.
             </AlertDialogDescription>
           </AlertDialogHeader>
