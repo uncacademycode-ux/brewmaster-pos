@@ -75,7 +75,8 @@ export default function OrdersPage() {
   const setStatus = useSetOrderStatus();
   const deleteOrder = useDeleteOrder();
   const deleteRange = useDeleteOrdersInRange();
-  const [resetScope, setResetScope] = useState<null | "day" | "month">(null);
+  const deleteAll = useDeleteAllOrders();
+  const [resetScope, setResetScope] = useState<null | "day" | "month" | "all">(null);
 
   const todaysOrders = useMemo(() => {
     const today = new Date().toDateString();
