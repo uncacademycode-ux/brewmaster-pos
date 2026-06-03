@@ -287,3 +287,37 @@ export function useSetOrderTable() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ordersKey }),
   });
 }
+
+export function useDeleteOrder() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await supabase.from("order_items").delete().eq("order_id", id);
+      const { error } = await supabase.from("orders").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ordersKey }),
+  });
+}
+
+export function useDeleteOrdersInRange() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { from: Date; to: Date }) => {
+      const { data: ids, error: e1 } = await supabase
+        .from("orders")
+        .select("id")
+        .gte("created_at", input.from.toISOString())
+        .lt("created_at", input.to.toISOString());
+      if (e1) throw e1;
+      const orderIds = (ids ?? []).map((r: any) => r.id);
+      if (orderIds.length === 0) return 0;
+      await supabase.from("order_items").delete().in("order_id", orderIds);
+      const { error } = await supabase.from("orders").delete().in("id", orderIds);
+      if (error) throw error;
+      return orderIds.length;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ordersKey }),
+  });
+}
+
