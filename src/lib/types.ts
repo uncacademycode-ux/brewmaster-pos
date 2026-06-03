@@ -20,7 +20,7 @@ export interface CartItem {
   quantity: number;
 }
 
-export type OrderStatus = "Pending" | "Preparing" | "Completed";
+export type OrderStatus = "Pending" | "Preparing" | "Completed" | "Cancelled";
 
 export interface OrderItemRow {
   id: string;
