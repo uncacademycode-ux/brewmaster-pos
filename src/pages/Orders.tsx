@@ -128,6 +128,9 @@ export default function OrdersPage() {
           <Button size="sm" variant="destructive" onClick={() => setResetScope("month")} disabled={monthOrders.length === 0}>
             <Trash2 className="mr-1 h-4 w-4" /> Réinit. mois
           </Button>
+          <Button size="sm" variant="destructive" onClick={() => setResetScope("all")} disabled={orders.length === 0}>
+            <Trash2 className="mr-1 h-4 w-4" /> Tout réinitialiser
+          </Button>
         </div>
       </div>
 
