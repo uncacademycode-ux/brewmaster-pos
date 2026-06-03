@@ -8,7 +8,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { formatCurrency } from "@/lib/cart-store";
-import { useDeleteOrder, useDeleteOrdersInRange, useOrders, useSetOrderStatus } from "@/lib/api";
+import { useDeleteAllOrders, useDeleteOrder, useDeleteOrdersInRange, useOrders, useSetOrderStatus } from "@/lib/api";
 import type { Order, OrderStatus } from "@/lib/types";
 import { toast } from "sonner";
 
