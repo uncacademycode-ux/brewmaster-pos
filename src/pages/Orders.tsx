@@ -241,6 +241,11 @@ function OrderCard({
               <XCircle className="mr-1 h-3 w-3" /> Annuler
             </Button>
           )}
+          {order.status === "Cancelled" && (
+            <Button size="sm" variant="ghost" className="flex-1 text-foreground" onClick={() => onChange("Pending")}>
+              <RotateCcw className="mr-1 h-3 w-3" /> Restaurer
+            </Button>
+          )}
           <Button size="sm" variant="ghost" className="flex-1 text-muted-foreground" onClick={onDelete}>
             <Trash2 className="mr-1 h-3 w-3" /> Supprimer
           </Button>
