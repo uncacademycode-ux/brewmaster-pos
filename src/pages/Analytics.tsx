@@ -152,6 +152,45 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="mt-6 border-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-destructive">Zone de réinitialisation</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Supprime définitivement les commandes et leurs articles. Cette action est irréversible — pensez à exporter d'abord depuis la page Commandes.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="destructive" size="sm" onClick={() => setResetScope("day")} disabled={allOrders.length === 0}>
+              <Trash2 className="mr-1 h-4 w-4" /> Réinit. jour
+            </Button>
+            <Button variant="destructive" size="sm" onClick={() => setResetScope("month")} disabled={allOrders.length === 0}>
+              <Trash2 className="mr-1 h-4 w-4" /> Réinit. mois
+            </Button>
+            <Button variant="destructive" size="sm" onClick={() => setResetScope("all")} disabled={allOrders.length === 0}>
+              <Trash2 className="mr-1 h-4 w-4" /> Tout réinitialiser
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={resetScope !== null} onOpenChange={(open) => !open && setResetScope(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Réinitialiser {resetScope === "day" ? "les commandes du jour" : resetScope === "month" ? "les commandes du mois" : "TOUTES les commandes"} ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action supprimera définitivement les commandes et leurs articles. Pensez à exporter avant.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleReset}>Supprimer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
