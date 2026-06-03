@@ -1,12 +1,30 @@
-import { useMemo } from "react";
-import { DollarSign, Loader2, ShoppingBag, TrendingUp, Trophy } from "lucide-react";
+import { useMemo, useState } from "react";
+import { DollarSign, Loader2, ShoppingBag, Trash2, TrendingUp, Trophy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import { formatCurrency } from "@/lib/cart-store";
-import { useOrders } from "@/lib/api";
+import { useDeleteAllOrders, useDeleteOrdersInRange, useOrders } from "@/lib/api";
+import { toast } from "sonner";
+
+function dayRange() {
+  const from = new Date(); from.setHours(0, 0, 0, 0);
+  const to = new Date(from); to.setDate(from.getDate() + 1);
+  return { from, to };
+}
+function monthRange() {
+  const now = new Date();
+  const from = new Date(now.getFullYear(), now.getMonth(), 1);
+  const to = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return { from, to };
+}
 
 export default function AnalyticsPage() {
   const { data: allOrders = [], isLoading } = useOrders();
