@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Clock, ChefHat, CheckCircle2, Loader2, XCircle, Download, Trash2 } from "lucide-react";
+import { Clock, ChefHat, CheckCircle2, Loader2, XCircle, Download, Trash2, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -239,6 +239,11 @@ function OrderCard({
           {canCancel && (
             <Button size="sm" variant="ghost" className="flex-1 text-destructive hover:text-destructive" onClick={onCancel}>
               <XCircle className="mr-1 h-3 w-3" /> Annuler
+            </Button>
+          )}
+          {order.status === "Cancelled" && (
+            <Button size="sm" variant="ghost" className="flex-1 text-foreground" onClick={() => onChange("Pending")}>
+              <RotateCcw className="mr-1 h-3 w-3" /> Restaurer
             </Button>
           )}
           <Button size="sm" variant="ghost" className="flex-1 text-muted-foreground" onClick={onDelete}>
